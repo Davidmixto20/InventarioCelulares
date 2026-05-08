@@ -1,0 +1,26 @@
+/* style.css */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+}
+
+/* Navbar Gradient */
+.brand-navbar {
+    background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+}
+
+/* Cards Hover Animation */
+.equipo-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+.equipo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+}
+
+.equipo-card i.bi {
+    font-size: 1.1rem;
+}
