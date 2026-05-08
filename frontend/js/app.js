@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('equipoForm').addEventListener('submit', handleFormSubmit);
 });
 
-// Utility to debounce search
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -66,6 +65,10 @@ function renderTable(equipos) {
         const fecha = isPrestado && eq.fecha_prestamo
             ? new Date(eq.fecha_prestamo).toLocaleDateString()
             : 'N/A';
+        
+        const fechaDevolucion = isPrestado && eq.fecha_devolucion
+            ? new Date(eq.fecha_devolucion).toLocaleDateString()
+            : 'N/A';
 
         div.innerHTML = `
             <div class="card h-100 shadow-sm border-0 equipo-card rounded-4">
@@ -86,9 +89,13 @@ function renderTable(equipos) {
                             <i class="bi bi-person text-primary me-2"></i>
                             <span>${isPrestado ? escapeHtml(eq.prestado_a || '-') : 'N/A'}</span>
                         </div>
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center mb-2">
                             <i class="bi bi-calendar3 text-primary me-2"></i>
-                            <span>${fecha}</span>
+                            <span>Prestado: ${fecha}</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-calendar-x text-danger me-2"></i>
+                            <span>Límite: ${fechaDevolucion}</span>
                         </div>
                     </div>
                 </div>
@@ -121,6 +128,11 @@ function editEquipo(equipo) {
     document.getElementById('modelo').value = equipo.modelo || '';
     document.getElementById('estado').value = equipo.estado;
     document.getElementById('prestado_a').value = equipo.prestado_a || '';
+    if (equipo.fecha_devolucion) {
+        document.getElementById('fecha_devolucion').value = equipo.fecha_devolucion.split('T')[0];
+    } else {
+        document.getElementById('fecha_devolucion').value = '';
+    }
 
     document.getElementById('equipoModalLabel').innerText = 'Editar Equipo';
     document.getElementById('formAlert').classList.add('d-none');
@@ -133,14 +145,18 @@ function togglePrestadoA() {
     const estado = document.getElementById('estado').value;
     const prestadoAContainer = document.getElementById('prestadoAContainer');
     const prestadoAInput = document.getElementById('prestado_a');
+    const fechaDevolucionInput = document.getElementById('fecha_devolucion');
 
     if (estado === 'prestado') {
         prestadoAContainer.style.display = 'block';
         prestadoAInput.required = true;
+        fechaDevolucionInput.required = true;
     } else {
         prestadoAContainer.style.display = 'none';
         prestadoAInput.required = false;
+        fechaDevolucionInput.required = false;
         prestadoAInput.value = '';
+        fechaDevolucionInput.value = '';
     }
 }
 
@@ -153,7 +169,8 @@ async function handleFormSubmit(e) {
         marca: document.getElementById('marca').value,
         modelo: document.getElementById('modelo').value,
         estado: document.getElementById('estado').value,
-        prestado_a: document.getElementById('prestado_a').value
+        prestado_a: document.getElementById('prestado_a').value,
+        fecha_devolucion: document.getElementById('fecha_devolucion').value
     };
 
     try {

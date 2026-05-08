@@ -1,6 +1,5 @@
 const Equipo = require('../models/equipo.model');
 
-// Asegurarnos de que la tabla existe
 Equipo.createTable().catch(console.error);
 
 exports.getAll = async (req, res, next) => {

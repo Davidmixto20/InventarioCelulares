@@ -1,7 +1,6 @@
 const db = require('../config/db');
 
 const Equipo = {
-    // Inicializar tabla si no existe
     createTable: async () => {
         const query = `
             CREATE TABLE IF NOT EXISTS equipos (
@@ -12,6 +11,7 @@ const Equipo = {
                 estado ENUM('disponible', 'prestado') DEFAULT 'disponible',
                 prestado_a VARCHAR(255) NULL,
                 fecha_prestamo DATETIME NULL,
+                fecha_devolucion DATE NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `;
@@ -44,31 +44,36 @@ const Equipo = {
     },
 
     create: async (data) => {
-        const { nombre, marca, modelo, estado, prestado_a } = data;
+        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion } = data;
         let fecha_prestamo = null;
+        let fechaDev = null;
         if (estado === 'prestado') {
             fecha_prestamo = new Date();
+            fechaDev = fecha_devolucion || null;
         }
 
         const query = `
-            INSERT INTO equipos (nombre, marca, modelo, estado, prestado_a, fecha_prestamo) 
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO equipos (nombre, marca, modelo, estado, prestado_a, fecha_prestamo, fecha_devolucion) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
-        const [result] = await db.query(query, [nombre, marca, modelo, estado || 'disponible', prestado_a || null, fecha_prestamo]);
+        const [result] = await db.query(query, [nombre, marca, modelo, estado || 'disponible', prestado_a || null, fecha_prestamo, fechaDev]);
         return result.insertId;
     },
 
     update: async (id, data) => {
-        const { nombre, marca, modelo, estado, prestado_a } = data;
+        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion } = data;
         let fecha_prestamo = null;
+        let fechaDev = null;
         if (estado === 'prestado' && prestado_a) {
-            // si cambia a prestado actualizamos fecha
             fecha_prestamo = new Date();
+            fechaDev = fecha_devolucion || null;
         }
 
         const query = `
             UPDATE equipos 
-            SET nombre = ?, marca = ?, modelo = ?, estado = ?, prestado_a = ?, fecha_prestamo = IF(? = 'prestado', COALESCE(fecha_prestamo, ?), NULL)
+            SET nombre = ?, marca = ?, modelo = ?, estado = ?, prestado_a = ?, 
+                fecha_prestamo = IF(? = 'prestado', COALESCE(fecha_prestamo, ?), NULL),
+                fecha_devolucion = IF(? = 'prestado', ?, NULL)
             WHERE id = ?
         `;
         const [result] = await db.query(query, [
@@ -79,6 +84,8 @@ const Equipo = {
             estado === 'prestado' ? prestado_a : null, 
             estado,
             fecha_prestamo,
+            estado,
+            fechaDev,
             id
         ]);
         return result.affectedRows > 0;
