@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/equipos';
+const API_URL = 'https://inventariocelulares.onrender.com';
 let equipoModal;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,19 +27,19 @@ async function loadEquipos() {
     try {
         const search = document.getElementById('searchInput').value;
         const estado = document.getElementById('filterEstado').value;
-        
+
         let url = API_URL;
         const params = new URLSearchParams();
         if (search) params.append('nombre', search);
         if (estado) params.append('estado', estado);
-        
+
         if (params.toString()) {
             url += '?' + params.toString();
         }
 
         const response = await fetch(url);
         const data = await response.json();
-        
+
         renderTable(data);
     } catch (error) {
         console.error('Error loading equipos:', error);
@@ -59,12 +59,12 @@ function renderTable(equipos) {
     equipos.forEach(eq => {
         const div = document.createElement('div');
         div.className = 'col-12 col-md-6 col-lg-4';
-        
+
         const isPrestado = eq.estado === 'prestado';
         const badgeClass = isPrestado ? 'bg-warning text-dark' : 'bg-success';
-        
-        const fecha = isPrestado && eq.fecha_prestamo 
-            ? new Date(eq.fecha_prestamo).toLocaleDateString() 
+
+        const fecha = isPrestado && eq.fecha_prestamo
+            ? new Date(eq.fecha_prestamo).toLocaleDateString()
             : 'N/A';
 
         div.innerHTML = `
@@ -121,10 +121,10 @@ function editEquipo(equipo) {
     document.getElementById('modelo').value = equipo.modelo || '';
     document.getElementById('estado').value = equipo.estado;
     document.getElementById('prestado_a').value = equipo.prestado_a || '';
-    
+
     document.getElementById('equipoModalLabel').innerText = 'Editar Equipo';
     document.getElementById('formAlert').classList.add('d-none');
-    
+
     togglePrestadoA();
     equipoModal.show();
 }
@@ -133,7 +133,7 @@ function togglePrestadoA() {
     const estado = document.getElementById('estado').value;
     const prestadoAContainer = document.getElementById('prestadoAContainer');
     const prestadoAInput = document.getElementById('prestado_a');
-    
+
     if (estado === 'prestado') {
         prestadoAContainer.style.display = 'block';
         prestadoAInput.required = true;
@@ -146,7 +146,7 @@ function togglePrestadoA() {
 
 async function handleFormSubmit(e) {
     e.preventDefault();
-    
+
     const id = document.getElementById('equipoId').value;
     const payload = {
         nombre: document.getElementById('nombre').value,
@@ -203,11 +203,11 @@ async function deleteEquipo(id) {
 
 function escapeHtml(unsafe) {
     return (unsafe || '').toString()
-         .replace(/&/g, "&amp;")
-         .replace(/</g, "&lt;")
-         .replace(/>/g, "&gt;")
-         .replace(/"/g, "&quot;")
-         .replace(/'/g, "&#039;");
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 }
 
 function showError(message) {
