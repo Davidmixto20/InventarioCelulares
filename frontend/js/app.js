@@ -1,4 +1,4 @@
-const API_URL = 'https://inventariocelulares.onrender.com';
+const API_URL = 'https://inventariocelulares.onrender.com/api/equipos';
 let equipoModal;
 
 document.addEventListener('DOMContentLoaded', () => {
