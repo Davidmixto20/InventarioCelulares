@@ -140,7 +140,7 @@ function editEquipo(equipo) {
     document.getElementById('modelo').value = equipo.modelo || '';
     document.getElementById('estado').value = equipo.estado;
     document.getElementById('prestado_a').value = equipo.prestado_a || '';
-    document.getElementById('imagen').value = equipo.imagen || '';
+    document.getElementById('inputImagen').value = equipo.imagen || '';
     if (equipo.fecha_devolucion) {
         document.getElementById('fecha_devolucion').value = equipo.fecha_devolucion.split('T')[0];
     } else {
@@ -184,7 +184,7 @@ async function handleFormSubmit(e) {
         estado: document.getElementById('estado').value,
         prestado_a: document.getElementById('prestado_a').value,
         fecha_devolucion: document.getElementById('fecha_devolucion').value,
-        imagen: document.getElementById('imagen').value
+        imagen: document.getElementById('inputImagen').value
     };
 
     try {
