@@ -1,4 +1,6 @@
-const API_URL = 'https://inventariocelulares.onrender.com/api/equipos';
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000/api/equipos'
+    : 'https://inventariocelulares.onrender.com/api/equipos';
 let equipoModal;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -46,6 +48,32 @@ async function loadEquipos() {
     }
 }
 
+function getEquipoImagen(eq) {
+    if (eq.imagen && eq.imagen.trim() !== '') {
+        return eq.imagen;
+    }
+
+    const marca = (eq.marca || '').toLowerCase();
+    
+    if (marca.includes('apple') || marca.includes('iphone')) {
+        return 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=400&auto=format';
+    }
+    if (marca.includes('samsung')) {
+        return 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=400&auto=format';
+    }
+    if (marca.includes('xiaomi')) {
+        return 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=400&auto=format';
+    }
+    if (marca.includes('huawei')) {
+        return 'https://images.unsplash.com/photo-1565849906461-0e443530e24c?q=80&w=400&auto=format';
+    }
+    if (marca.includes('motorola') || marca.includes('moto')) {
+        return 'https://images.unsplash.com/photo-1612441798922-5bc566a22752?q=80&w=400&auto=format';
+    }
+
+    return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=400&auto=format';
+}
+
 function renderTable(equipos) {
     const grid = document.getElementById('equiposGrid');
     grid.innerHTML = '';
@@ -61,6 +89,7 @@ function renderTable(equipos) {
 
         const isPrestado = eq.estado === 'prestado';
         const badgeClass = isPrestado ? 'bg-warning text-dark' : 'bg-success';
+        const imgUrl = getEquipoImagen(eq);
 
         const fecha = isPrestado && eq.fecha_prestamo
             ? new Date(eq.fecha_prestamo).toLocaleDateString()
@@ -72,14 +101,14 @@ function renderTable(equipos) {
 
         div.innerHTML = `
             <div class="card h-100 shadow-sm border-0 equipo-card rounded-4 overflow-hidden">
-                ${eq.imagen ? `<img src="${escapeHtml(eq.imagen)}" class="card-img-top object-fit-cover" style="height: 180px;" alt="${escapeHtml(eq.nombre)}">` : ''}
+                <div class="position-relative">
+                    <img src="${imgUrl}" class="card-img-top object-fit-cover" style="height: 200px;" alt="${escapeHtml(eq.nombre)}">
+                    <span class="badge ${badgeClass} rounded-pill px-3 py-2 position-absolute top-0 end-0 m-3 shadow-sm">${eq.estado}</span>
+                </div>
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <h5 class="card-title fw-bold mb-0 text-truncate" title="${escapeHtml(eq.nombre)}">
-                            ${escapeHtml(eq.nombre)}
-                        </h5>
-                        <span class="badge ${badgeClass} rounded-pill px-3 py-2">${eq.estado}</span>
-                    </div>
+                    <h5 class="card-title fw-bold mb-3 text-truncate" title="${escapeHtml(eq.nombre)}">
+                        ${escapeHtml(eq.nombre)}
+                    </h5>
                     
                     <div class="mb-3 text-muted small">
                         <div class="d-flex align-items-center mb-2">
