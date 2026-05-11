@@ -6,7 +6,6 @@ let equipoModal;
 document.addEventListener('DOMContentLoaded', () => {
     equipoModal = new bootstrap.Modal(document.getElementById('equipoModal'));
     loadEquipos();
-
     document.getElementById('searchInput').addEventListener('input', debounce(loadEquipos, 300));
     document.getElementById('filterEstado').addEventListener('change', loadEquipos);
     document.getElementById('equipoForm').addEventListener('submit', handleFormSubmit);
@@ -28,25 +27,16 @@ async function loadEquipos() {
     try {
         const search = document.getElementById('searchInput').value;
         const estado = document.getElementById('filterEstado').value;
-
         let url = API_URL;
         const params = new URLSearchParams();
         if (search) params.append('nombre', search);
         if (estado) params.append('estado', estado);
-
-        if (params.toString()) {
-            url += '?' + params.toString();
-        }
-
+        if (params.toString()) url += '?' + params.toString();
         const response = await fetch(url);
         const data = await response.json();
-
-        // Actualizar estadísticas
         actualizarStats(data);
-        
         renderTable(data);
     } catch (error) {
-        console.error('Error loading equipos:', error);
         showError('No se pudieron cargar los equipos.');
     }
 }
@@ -55,46 +45,31 @@ function actualizarStats(equipos) {
     const total = equipos.length;
     const disponibles = equipos.filter(e => e.estado === 'disponible').length;
     const prestados = equipos.filter(e => e.estado === 'prestado').length;
-
     document.getElementById('statTotal').innerText = total;
     document.getElementById('statDisponibles').innerText = disponibles;
     document.getElementById('statPrestados').innerText = prestados;
     document.getElementById('registrosCount').innerText = `${total} registros`;
 }
 
-function getEquipoImagen(eq) {
-    if (eq.imagen && eq.imagen.trim() !== '') {
-        return eq.imagen;
-    }
-    // Imagen genérica elegante si el usuario no pone una
-    return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=400&auto=format';
-}
-
 function renderTable(equipos) {
     const tbody = document.getElementById('equiposTableBody');
     tbody.innerHTML = '';
-
     if (equipos.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No se encontraron equipos</td></tr>';
         return;
     }
-
     equipos.forEach(eq => {
         const tr = document.createElement('tr');
         const isPrestado = eq.estado === 'prestado';
         const badgeClass = isPrestado ? 'bg-warning text-dark' : 'bg-success';
-        
-        // Procesar fechas de forma más robusta
         const formatFecha = (fechaStr) => {
             if (!fechaStr) return '-';
             const d = new Date(fechaStr);
             return isNaN(d.getTime()) ? '-' : d.toLocaleDateString();
         };
-
         const fechaPrestamo = isPrestado ? formatFecha(eq.fecha_prestamo) : '-';
         const fechaDevolucion = isPrestado ? formatFecha(eq.fecha_devolucion) : '-';
         const imgUrl = eq.imagen && eq.imagen.trim() !== '' ? eq.imagen : null;
-
         tr.innerHTML = `
             <td>
                 <div class="d-flex flex-column position-relative equipo-name-cell">
@@ -106,18 +81,10 @@ function renderTable(equipos) {
                     </div>` : ''}
                 </div>
             </td>
-            <td>
-                <span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span>
-            </td>
-            <td>
-                <span class="text-light font-mono small">${fechaPrestamo}</span>
-            </td>
-            <td>
-                <span class="text-danger font-mono small">${fechaDevolucion}</span>
-            </td>
-            <td>
-                <span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span>
-            </td>
+            <td><span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span></td>
+            <td><span class="text-light font-mono small">${fechaPrestamo}</span></td>
+            <td><span class="text-danger font-mono small">${fechaDevolucion}</span></td>
+            <td><span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span></td>
             <td class="text-end">
                 <div class="d-flex justify-content-end gap-2">
                     <button class="btn btn-outline-secondary btn-sm" onclick='editEquipo(${JSON.stringify(eq).replace(/'/g, "\\'")})'>
@@ -154,10 +121,8 @@ function editEquipo(equipo) {
     } else {
         document.getElementById('fecha_devolucion').value = '';
     }
-
     document.getElementById('equipoModalLabel').innerText = 'Editar Equipo';
     document.getElementById('formAlert').classList.add('d-none');
-
     togglePrestadoA();
     equipoModal.show();
 }
@@ -167,7 +132,6 @@ function togglePrestadoA() {
     const prestadoAContainer = document.getElementById('prestadoAContainer');
     const prestadoAInput = document.getElementById('prestado_a');
     const fechaDevolucionInput = document.getElementById('fecha_devolucion');
-
     if (estado === 'prestado') {
         prestadoAContainer.style.display = 'block';
         prestadoAInput.required = true;
@@ -183,7 +147,6 @@ function togglePrestadoA() {
 
 async function handleFormSubmit(e) {
     e.preventDefault();
-
     const id = document.getElementById('equipoId').value;
     const payload = {
         nombre: document.getElementById('nombre').value,
@@ -194,29 +157,20 @@ async function handleFormSubmit(e) {
         fecha_devolucion: document.getElementById('fecha_devolucion').value,
         imagen: document.getElementById('inputImagen').value
     };
-
     try {
         let url = API_URL;
         let method = 'POST';
-
         if (id) {
             url += `/${id}`;
             method = 'PUT';
         }
-
         const response = await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-
         const result = await response.json();
-
-        if (!response.ok) {
-            throw new Error(result.message || 'Error al guardar el equipo');
-        }
-
-        // --- SUPER FIX: Limpieza total tras guardar ---
+        if (!response.ok) throw new Error(result.message || 'Error al guardar el equipo');
         document.getElementById('equipoId').value = '';
         document.getElementById('equipoForm').reset();
         equipoModal.hide();
@@ -229,8 +183,7 @@ async function handleFormSubmit(e) {
 }
 
 async function deleteEquipo(id) {
-    if (!confirm('¿Estás seguro de que deseas eliminar este equipo? Esta acción no se puede deshacer.')) return;
-
+    if (!confirm('¿Estás seguro de que deseas eliminar este equipo?')) return;
     try {
         const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
         if (!response.ok) {
@@ -253,6 +206,6 @@ function escapeHtml(unsafe) {
 }
 
 function showError(message) {
-    const grid = document.getElementById('equiposGrid');
-    grid.innerHTML = `<div class="col-12"><div class="alert alert-danger text-center shadow-sm border-0"><i class="bi bi-exclamation-triangle me-2"></i>${message}</div></div>`;
+    const grid = document.getElementById('equiposTableBody');
+    grid.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>${message}</td></tr>`;
 }

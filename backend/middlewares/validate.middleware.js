@@ -1,7 +1,7 @@
 exports.validateEquipo = (req, res, next) => {
     const { nombre, estado, prestado_a, fecha_devolucion } = req.body;
 
-    if (!nombre || nombre.trim() === '') {
+    if (!nombre || String(nombre).trim() === '') {
         return res.status(400).json({ message: 'El campo nombre es obligatorio' });
     }
 
@@ -10,10 +10,10 @@ exports.validateEquipo = (req, res, next) => {
     }
 
     if (estado === 'prestado') {
-        if (!prestado_a || prestado_a.trim() === '') {
+        if (!prestado_a || String(prestado_a).trim() === '') {
             return res.status(400).json({ message: 'Debe indicar a quién se presta el equipo' });
         }
-        if (!fecha_devolucion || fecha_devolucion.trim() === '') {
+        if (!fecha_devolucion || String(fecha_devolucion).trim() === '') {
             return res.status(400).json({ message: 'Debe indicar la fecha límite de devolución' });
         }
     }

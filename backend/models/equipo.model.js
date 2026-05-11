@@ -17,12 +17,9 @@ const Equipo = {
             ) ENGINE=InnoDB;
         `;
         await db.query(query);
-        // Asegurar que el ID sea auto_increment por si se dañó manualmente
         try {
             await db.query('ALTER TABLE equipos MODIFY id INT AUTO_INCREMENT;');
-        } catch (e) {
-            console.log("Aviso: El ID ya es auto_increment o no se puede modificar automáticamente.");
-        }
+        } catch (e) { }
     },
 
     findAll: async (filters = {}) => {
