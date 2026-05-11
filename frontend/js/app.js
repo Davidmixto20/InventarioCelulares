@@ -71,7 +71,8 @@ function renderTable(equipos) {
             : 'N/A';
 
         div.innerHTML = `
-            <div class="card h-100 shadow-sm border-0 equipo-card rounded-4">
+            <div class="card h-100 shadow-sm border-0 equipo-card rounded-4 overflow-hidden">
+                ${eq.imagen ? `<img src="${escapeHtml(eq.imagen)}" class="card-img-top object-fit-cover" style="height: 180px;" alt="${escapeHtml(eq.nombre)}">` : ''}
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <h5 class="card-title fw-bold mb-0 text-truncate" title="${escapeHtml(eq.nombre)}">
@@ -128,6 +129,7 @@ function editEquipo(equipo) {
     document.getElementById('modelo').value = equipo.modelo || '';
     document.getElementById('estado').value = equipo.estado;
     document.getElementById('prestado_a').value = equipo.prestado_a || '';
+    document.getElementById('imagen').value = equipo.imagen || '';
     if (equipo.fecha_devolucion) {
         document.getElementById('fecha_devolucion').value = equipo.fecha_devolucion.split('T')[0];
     } else {
@@ -170,7 +172,8 @@ async function handleFormSubmit(e) {
         modelo: document.getElementById('modelo').value,
         estado: document.getElementById('estado').value,
         prestado_a: document.getElementById('prestado_a').value,
-        fecha_devolucion: document.getElementById('fecha_devolucion').value
+        fecha_devolucion: document.getElementById('fecha_devolucion').value,
+        imagen: document.getElementById('imagen').value
     };
 
     try {

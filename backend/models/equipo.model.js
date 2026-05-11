@@ -12,6 +12,7 @@ const Equipo = {
                 prestado_a VARCHAR(255) NULL,
                 fecha_prestamo DATETIME NULL,
                 fecha_devolucion DATE NULL,
+                imagen TEXT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `;
@@ -44,7 +45,7 @@ const Equipo = {
     },
 
     create: async (data) => {
-        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion } = data;
+        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion, imagen } = data;
         let fecha_prestamo = null;
         let fechaDev = null;
         if (estado === 'prestado') {
@@ -53,15 +54,15 @@ const Equipo = {
         }
 
         const query = `
-            INSERT INTO equipos (nombre, marca, modelo, estado, prestado_a, fecha_prestamo, fecha_devolucion) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO equipos (nombre, marca, modelo, estado, prestado_a, fecha_prestamo, fecha_devolucion, imagen) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        const [result] = await db.query(query, [nombre, marca, modelo, estado || 'disponible', prestado_a || null, fecha_prestamo, fechaDev]);
+        const [result] = await db.query(query, [nombre, marca, modelo, estado || 'disponible', prestado_a || null, fecha_prestamo, fechaDev, imagen || null]);
         return result.insertId;
     },
 
     update: async (id, data) => {
-        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion } = data;
+        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion, imagen } = data;
         let fecha_prestamo = null;
         let fechaDev = null;
         if (estado === 'prestado' && prestado_a) {
@@ -73,7 +74,8 @@ const Equipo = {
             UPDATE equipos 
             SET nombre = ?, marca = ?, modelo = ?, estado = ?, prestado_a = ?, 
                 fecha_prestamo = IF(? = 'prestado', COALESCE(fecha_prestamo, ?), NULL),
-                fecha_devolucion = IF(? = 'prestado', ?, NULL)
+                fecha_devolucion = IF(? = 'prestado', ?, NULL),
+                imagen = ?
             WHERE id = ?
         `;
         const [result] = await db.query(query, [
@@ -86,6 +88,7 @@ const Equipo = {
             fecha_prestamo,
             estado,
             fechaDev,
+            imagen || null,
             id
         ]);
         return result.affectedRows > 0;
