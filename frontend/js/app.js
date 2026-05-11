@@ -41,11 +41,27 @@ async function loadEquipos() {
         const response = await fetch(url);
         const data = await response.json();
 
+        // Actualizar estadísticas
+        actualizarStats(data);
+        
         renderTable(data);
     } catch (error) {
         console.error('Error loading equipos:', error);
-        showError('No se pudieron cargar los equipos. Verifica que el servidor backend esté corriendo.');
+        showError('No se pudieron cargar los equipos.');
     }
+}
+
+function actualizarStats(equipos) {
+    const total = equipos.length;
+    const disponibles = equipos.filter(e => e.estado === 'disponible').length;
+    const prestados = equipos.filter(e => e.estado === 'prestado').length;
+    const mantenimiento = equipos.filter(e => e.estado === 'mantenimiento').length;
+
+    document.getElementById('statTotal').innerText = total;
+    document.getElementById('statDisponibles').innerText = disponibles;
+    document.getElementById('statPrestados').innerText = prestados;
+    document.getElementById('statMantenimiento').innerText = mantenimiento;
+    document.getElementById('registrosCount').innerText = `${total} registros`;
 }
 
 function getEquipoImagen(eq) {
@@ -57,71 +73,56 @@ function getEquipoImagen(eq) {
 }
 
 function renderTable(equipos) {
-    const grid = document.getElementById('equiposGrid');
-    grid.innerHTML = '';
+    const tbody = document.getElementById('equiposTableBody');
+    tbody.innerHTML = '';
 
     if (equipos.length === 0) {
-        grid.innerHTML = '<div class="col-12"><div class="alert alert-info text-center shadow-sm border-0"><i class="bi bi-info-circle me-2"></i>No se encontraron equipos</div></div>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No se encontraron equipos</td></tr>';
         return;
     }
 
     equipos.forEach(eq => {
-        const div = document.createElement('div');
-        div.className = 'col-12 col-md-6 col-lg-4';
-
+        const tr = document.createElement('tr');
         const isPrestado = eq.estado === 'prestado';
-        const badgeClass = isPrestado ? 'bg-warning text-dark' : 'bg-success';
-        const imgUrl = getEquipoImagen(eq);
-
+        const badgeClass = isPrestado ? 'bg-warning text-dark' : (eq.estado === 'mantenimiento' ? 'bg-danger' : 'bg-success');
+        
         const fecha = isPrestado && eq.fecha_prestamo
             ? new Date(eq.fecha_prestamo).toLocaleDateString()
-            : 'N/A';
-        
-        const fechaDevolucion = isPrestado && eq.fecha_devolucion
-            ? new Date(eq.fecha_devolucion).toLocaleDateString()
-            : 'N/A';
+            : '-';
 
-        div.innerHTML = `
-            <div class="card h-100 shadow-sm border-0 equipo-card rounded-4 overflow-hidden">
-                <div class="position-relative">
-                    <img src="${imgUrl}" class="card-img-top object-fit-cover" style="height: 200px;" alt="${escapeHtml(eq.nombre)}">
-                    <span class="badge ${badgeClass} rounded-pill px-3 py-2 position-absolute top-0 end-0 m-3 shadow-sm">${eq.estado}</span>
-                </div>
-                <div class="card-body p-4">
-                    <h5 class="card-title fw-bold mb-3 text-truncate" title="${escapeHtml(eq.nombre)}">
-                        ${escapeHtml(eq.nombre)}
-                    </h5>
-                    
-                    <div class="mb-3 text-muted small">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-tag text-primary me-2"></i>
-                            <span>${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
-                        </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-person text-primary me-2"></i>
-                            <span>${isPrestado ? escapeHtml(eq.prestado_a || '-') : 'N/A'}</span>
-                        </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-calendar3 text-primary me-2"></i>
-                            <span>Prestado: ${fecha}</span>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-calendar-x text-danger me-2"></i>
-                            <span>Límite: ${fechaDevolucion}</span>
-                        </div>
+        tr.innerHTML = `
+            <td>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-glass d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-phone text-cyan"></i>
                     </div>
+                    <span class="fw-semibold">${escapeHtml(eq.nombre)}</span>
                 </div>
-                <div class="card-footer bg-transparent border-top-0 p-4 pt-0 d-flex justify-content-end gap-2">
-                    <button class="btn btn-light btn-sm rounded-pill px-3 shadow-sm text-primary fw-semibold" onclick='editEquipo(${JSON.stringify(eq).replace(/'/g, "\\'")})'>
-                        <i class="bi bi-pencil me-1"></i> Editar
+            </td>
+            <td>
+                <span class="text-secondary font-mono small">${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
+            </td>
+            <td>
+                <span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span>
+            </td>
+            <td>
+                <span class="text-muted font-mono small">${fecha}</span>
+            </td>
+            <td>
+                <span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span>
+            </td>
+            <td class="text-end">
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-outline-secondary btn-sm" onclick='editEquipo(${JSON.stringify(eq).replace(/'/g, "\\'")})'>
+                        <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-light btn-sm rounded-pill px-3 shadow-sm text-danger fw-semibold" onclick="deleteEquipo(${eq.id})">
-                        <i class="bi bi-trash me-1"></i> Eliminar
+                    <button class="btn btn-outline-secondary btn-sm text-danger" onclick="deleteEquipo(${eq.id})">
+                        <i class="bi bi-trash"></i>
                     </button>
                 </div>
-            </div>
+            </td>
         `;
-        grid.appendChild(div);
+        tbody.appendChild(tr);
     });
 }
 
