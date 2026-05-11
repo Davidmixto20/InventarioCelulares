@@ -45,8 +45,6 @@ const Equipo = {
     },
 
     create: async (data) => {
-        console.log('--- DB CREATE DEBUG ---');
-        console.log('Data recibida en modelo:', data);
         const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion, imagen } = data;
         let fecha_prestamo = null;
         let fechaDev = null;
@@ -59,16 +57,11 @@ const Equipo = {
             INSERT INTO equipos (nombre, marca, modelo, estado, prestado_a, fecha_prestamo, fecha_devolucion, imagen) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        const valores = [nombre, marca, modelo, estado || 'disponible', prestado_a || null, fecha_prestamo, fechaDev, imagen || null];
-        console.log('Valores que se enviarán a SQL:', valores);
-        
-        const [result] = await db.query(query, valores);
+        const [result] = await db.query(query, [nombre, marca, modelo, estado || 'disponible', prestado_a || null, fecha_prestamo, fechaDev, imagen || null]);
         return result.insertId;
     },
 
     update: async (id, data) => {
-        console.log('--- DB UPDATE DEBUG ---');
-        console.log('ID:', id, 'Data recibida:', data);
         const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion, imagen } = data;
         let fecha_prestamo = null;
         let fechaDev = null;
@@ -85,7 +78,7 @@ const Equipo = {
                 imagen = ?
             WHERE id = ?
         `;
-        const valores = [
+        const [result] = await db.query(query, [
             nombre, 
             marca, 
             modelo, 
@@ -97,10 +90,7 @@ const Equipo = {
             fechaDev,
             imagen || null,
             id
-        ];
-        console.log('Valores que se enviarán a SQL (Update):', valores);
-
-        const [result] = await db.query(query, valores);
+        ]);
         return result.affectedRows > 0;
     },
 
