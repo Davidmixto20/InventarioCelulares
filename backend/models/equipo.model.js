@@ -8,6 +8,7 @@ const Equipo = {
                 nombre VARCHAR(255) NOT NULL,
                 marca VARCHAR(100),
                 modelo VARCHAR(100),
+                imagen TEXT,
                 estado ENUM('disponible', 'prestado') DEFAULT 'disponible',
                 prestado_a VARCHAR(255) NULL,
                 fecha_prestamo DATETIME NULL,
@@ -44,7 +45,7 @@ const Equipo = {
     },
 
     create: async (data) => {
-        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion } = data;
+        const { nombre, marca, modelo, imagen, estado, prestado_a, fecha_devolucion } = data;
         let fecha_prestamo = null;
         let fechaDev = null;
         if (estado === 'prestado') {
@@ -53,15 +54,24 @@ const Equipo = {
         }
 
         const query = `
-            INSERT INTO equipos (nombre, marca, modelo, estado, prestado_a, fecha_prestamo, fecha_devolucion) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO equipos (nombre, marca, modelo, imagen, estado, prestado_a, fecha_prestamo, fecha_devolucion) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        const [result] = await db.query(query, [nombre, marca, modelo, estado || 'disponible', prestado_a || null, fecha_prestamo, fechaDev]);
+        const [result] = await db.query(query, [
+            nombre, 
+            marca, 
+            modelo, 
+            imagen || null, 
+            estado || 'disponible', 
+            prestado_a || null, 
+            fecha_prestamo, 
+            fechaDev
+        ]);
         return result.insertId;
     },
 
     update: async (id, data) => {
-        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion } = data;
+        const { nombre, marca, modelo, imagen, estado, prestado_a, fecha_devolucion } = data;
         let fecha_prestamo = null;
         let fechaDev = null;
         if (estado === 'prestado' && prestado_a) {
@@ -71,7 +81,7 @@ const Equipo = {
 
         const query = `
             UPDATE equipos 
-            SET nombre = ?, marca = ?, modelo = ?, estado = ?, prestado_a = ?, 
+            SET nombre = ?, marca = ?, modelo = ?, imagen = ?, estado = ?, prestado_a = ?, 
                 fecha_prestamo = IF(? = 'prestado', COALESCE(fecha_prestamo, ?), NULL),
                 fecha_devolucion = IF(? = 'prestado', ?, NULL)
             WHERE id = ?
@@ -80,6 +90,7 @@ const Equipo = {
             nombre, 
             marca, 
             modelo, 
+            imagen || null,
             estado, 
             estado === 'prestado' ? prestado_a : null, 
             estado,

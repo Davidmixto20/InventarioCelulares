@@ -1,6 +1,20 @@
 const Equipo = require('../models/equipo.model');
+const googleIt = require('google-it');
 
 Equipo.createTable().catch(console.error);
+
+async function obtenerImagen(modelo) {
+    try {
+        const results = await googleIt({ 
+            'query': `${modelo} phone png transparent`,
+            'limit': 5,
+            'only-urls': true 
+        });
+        return results[0] || 'https://via.placeholder.com/150'; 
+    } catch (error) {
+        return 'https://via.placeholder.com/150';
+    }
+}
 
 exports.getAll = async (req, res, next) => {
     try {
@@ -29,7 +43,16 @@ exports.getById = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
     try {
-        const insertId = await Equipo.create(req.body);
+        const { nombre, marca } = req.body;
+        
+        const imagenUrl = await obtenerImagen(`${marca} ${nombre}`);
+        
+        const datosConImagen = {
+            ...req.body,
+            imagen: imagenUrl
+        };
+
+        const insertId = await Equipo.create(datosConImagen);
         const nuevoEquipo = await Equipo.findById(insertId);
         
         res.status(201).json({
