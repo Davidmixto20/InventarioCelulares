@@ -84,19 +84,26 @@ function renderTable(equipos) {
         const isPrestado = eq.estado === 'prestado';
         const badgeClass = isPrestado ? 'bg-warning text-dark' : 'bg-success';
         
-        const fechaPrestamo = isPrestado && eq.fecha_prestamo
-            ? new Date(eq.fecha_prestamo).toLocaleDateString()
-            : '-';
-        
-        const fechaDevolucion = isPrestado && eq.fecha_devolucion
-            ? new Date(eq.fecha_devolucion).toLocaleDateString()
-            : '-';
+        // Procesar fechas de forma más robusta
+        const formatFecha = (fechaStr) => {
+            if (!fechaStr) return '-';
+            const d = new Date(fechaStr);
+            return isNaN(d.getTime()) ? '-' : d.toLocaleDateString();
+        };
+
+        const fechaPrestamo = isPrestado ? formatFecha(eq.fecha_prestamo) : '-';
+        const fechaDevolucion = isPrestado ? formatFecha(eq.fecha_devolucion) : '-';
+        const imgUrl = eq.imagen && eq.imagen.trim() !== '' ? eq.imagen : null;
 
         tr.innerHTML = `
             <td>
-                <div class="d-flex flex-column">
+                <div class="d-flex flex-column position-relative equipo-name-cell">
                     <span class="fw-bold">${escapeHtml(eq.nombre)}</span>
                     <span class="text-secondary font-mono x-small" style="font-size: 0.7rem;">${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
+                    ${imgUrl ? `
+                    <div class="hover-preview shadow-lg rounded-3 border border-glass">
+                        <img src="${imgUrl}" alt="Preview" style="width: 120px; height: 120px; object-fit: cover;">
+                    </div>` : ''}
                 </div>
             </td>
             <td>
