@@ -216,6 +216,9 @@ async function handleFormSubmit(e) {
             throw new Error(result.message || 'Error al guardar el equipo');
         }
 
+        // --- SUPER FIX: Limpieza total tras guardar ---
+        document.getElementById('equipoId').value = '';
+        document.getElementById('equipoForm').reset();
         equipoModal.hide();
         loadEquipos();
     } catch (error) {
