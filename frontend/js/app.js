@@ -52,25 +52,7 @@ function getEquipoImagen(eq) {
     if (eq.imagen && eq.imagen.trim() !== '') {
         return eq.imagen;
     }
-
-    const marca = (eq.marca || '').toLowerCase();
-    
-    if (marca.includes('apple') || marca.includes('iphone')) {
-        return 'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?q=80&w=400&auto=format';
-    }
-    if (marca.includes('samsung')) {
-        return 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=400&auto=format';
-    }
-    if (marca.includes('xiaomi')) {
-        return 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=400&auto=format';
-    }
-    if (marca.includes('huawei')) {
-        return 'https://images.unsplash.com/photo-1565849906461-0e443530e24c?q=80&w=400&auto=format';
-    }
-    if (marca.includes('motorola') || marca.includes('moto')) {
-        return 'https://images.unsplash.com/photo-1612441798922-5bc566a22752?q=80&w=400&auto=format';
-    }
-
+    // Imagen genérica elegante si el usuario no pone una
     return 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=400&auto=format';
 }
 
