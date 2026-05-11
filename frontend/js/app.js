@@ -110,7 +110,7 @@ function renderTable(equipos) {
                 <span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span>
             </td>
             <td>
-                <span class="text-muted font-mono small">${fechaPrestamo}</span>
+                <span class="text-light font-mono small">${fechaPrestamo}</span>
             </td>
             <td>
                 <span class="text-danger font-mono small">${fechaDevolucion}</span>
