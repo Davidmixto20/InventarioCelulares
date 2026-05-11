@@ -31,32 +31,25 @@
 
         <!-- Tarjetas de Estadísticas -->
         <div class="row g-4 mb-5">
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="stat-card">
                     <i class="bi bi-phone text-cyan mb-2 fs-3"></i>
                     <div class="stat-number" id="statTotal">0</div>
                     <div class="stat-label">Total Equipos</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="stat-card">
                     <i class="bi bi-check-circle text-green mb-2 fs-3"></i>
                     <div class="stat-number" id="statDisponibles">0</div>
                     <div class="stat-label">Disponibles</div>
                 </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="stat-card">
                     <i class="bi bi-hand-index-thumb text-amber mb-2 fs-3"></i>
                     <div class="stat-number" id="statPrestados">0</div>
                     <div class="stat-label">Prestados</div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <i class="bi bi-tools text-red mb-2 fs-3"></i>
-                    <div class="stat-number" id="statMantenimiento">0</div>
-                    <div class="stat-label">Mantenimiento</div>
                 </div>
             </div>
         </div>
@@ -71,15 +64,15 @@
                 <span class="text-muted small font-mono" id="registrosCount">0 registros</span>
             </div>
             <div class="card-body p-4">
-                <!-- Filtros estilo imagen -->
+                <!-- Filtros -->
                 <div class="row g-3 mb-4 align-items-center">
-                    <div class="col-md-4">
+                    <div class="col-md-5">
                         <div class="input-group">
                             <span class="input-group-text"><i class="bi bi-search"></i></span>
                             <input type="text" id="searchInput" class="form-control" placeholder="Buscar por nombre, marca...">
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-4">
                         <select id="filterEstado" class="form-select">
                             <option value="">Todos los estados</option>
                             <option value="disponible">Disponible</option>
@@ -87,9 +80,6 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <input type="text" id="filterMarca" class="form-control" placeholder="Marca">
-                    </div>
-                    <div class="col-md-2">
                         <button class="btn btn-primary w-100" onclick="loadEquipos()">
                             <i class="bi bi-funnel-fill me-1"></i> Filtrar
                         </button>
@@ -102,9 +92,9 @@
                         <thead>
                             <tr>
                                 <th>EQUIPO</th>
-                                <th>MARCA / MODELO</th>
                                 <th>ASIGNADO A</th>
                                 <th>FECHA PRÉSTAMO</th>
+                                <th>DEVOLUCIÓN LÍMITE</th>
                                 <th>ESTADO</th>
                                 <th class="text-end">ACCIONES</th>
                             </tr>

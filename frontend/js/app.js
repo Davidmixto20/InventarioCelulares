@@ -55,12 +55,10 @@ function actualizarStats(equipos) {
     const total = equipos.length;
     const disponibles = equipos.filter(e => e.estado === 'disponible').length;
     const prestados = equipos.filter(e => e.estado === 'prestado').length;
-    const mantenimiento = equipos.filter(e => e.estado === 'mantenimiento').length;
 
     document.getElementById('statTotal').innerText = total;
     document.getElementById('statDisponibles').innerText = disponibles;
     document.getElementById('statPrestados').innerText = prestados;
-    document.getElementById('statMantenimiento').innerText = mantenimiento;
     document.getElementById('registrosCount').innerText = `${total} registros`;
 }
 
@@ -84,29 +82,31 @@ function renderTable(equipos) {
     equipos.forEach(eq => {
         const tr = document.createElement('tr');
         const isPrestado = eq.estado === 'prestado';
-        const badgeClass = isPrestado ? 'bg-warning text-dark' : (eq.estado === 'mantenimiento' ? 'bg-danger' : 'bg-success');
+        const badgeClass = isPrestado ? 'bg-warning text-dark' : 'bg-success';
         
-        const fecha = isPrestado && eq.fecha_prestamo
+        const fechaPrestamo = isPrestado && eq.fecha_prestamo
             ? new Date(eq.fecha_prestamo).toLocaleDateString()
+            : '-';
+        
+        const fechaDevolucion = isPrestado && eq.fecha_devolucion
+            ? new Date(eq.fecha_devolucion).toLocaleDateString()
             : '-';
 
         tr.innerHTML = `
             <td>
-                <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle bg-glass d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                        <i class="bi bi-phone text-cyan"></i>
-                    </div>
-                    <span class="fw-semibold">${escapeHtml(eq.nombre)}</span>
+                <div class="d-flex flex-column">
+                    <span class="fw-bold">${escapeHtml(eq.nombre)}</span>
+                    <span class="text-secondary font-mono x-small" style="font-size: 0.7rem;">${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
                 </div>
-            </td>
-            <td>
-                <span class="text-secondary font-mono small">${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
             </td>
             <td>
                 <span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span>
             </td>
             <td>
-                <span class="text-muted font-mono small">${fecha}</span>
+                <span class="text-muted font-mono small">${fechaPrestamo}</span>
+            </td>
+            <td>
+                <span class="text-danger font-mono small">${fechaDevolucion}</span>
             </td>
             <td>
                 <span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span>
