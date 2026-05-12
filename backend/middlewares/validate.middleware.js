@@ -5,8 +5,8 @@ exports.validateEquipo = (req, res, next) => {
         return res.status(400).json({ message: 'El campo nombre es obligatorio' });
     }
 
-    if (estado && !['disponible', 'prestado'].includes(estado)) {
-        return res.status(400).json({ message: 'El estado debe ser disponible o prestado' });
+    if (estado && !['disponible', 'prestado', 'mantenimiento'].includes(estado)) {
+        return res.status(400).json({ message: 'El estado debe ser disponible, prestado o mantenimiento' });
     }
 
     if (estado === 'prestado') {
