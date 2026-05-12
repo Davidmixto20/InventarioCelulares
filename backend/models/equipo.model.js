@@ -92,6 +92,14 @@ const Equipo = {
         const { nombre, marca, modelo, estado, prestado_a, tipo_documento, cedula_pasaporte, fecha_devolucion, imagen } = data;
         
         if (estado === 'prestado' && cedula_pasaporte) {
+            // Validar que el nombre coincida con el registrado para esa cédula
+            const [existing] = await db.query('SELECT prestado_a FROM equipos WHERE cedula_pasaporte = ? AND prestado_a IS NOT NULL LIMIT 1', [cedula_pasaporte]);
+            if (existing.length > 0 && existing[0].prestado_a !== prestado_a) {
+                const error = new Error(`La cédula ${cedula_pasaporte} ya está registrada a nombre de ${existing[0].prestado_a}.`);
+                error.statusCode = 400;
+                throw error;
+            }
+
             const [countResult] = await db.query('SELECT COUNT(*) as count FROM equipos WHERE cedula_pasaporte = ? AND estado = ?', [cedula_pasaporte, 'prestado']);
             if (countResult[0].count >= 5) {
                 const error = new Error('El cliente ya tiene el límite máximo de 5 equipos prestados.');
@@ -125,6 +133,14 @@ const Equipo = {
         const { nombre, marca, modelo, estado, prestado_a, tipo_documento, cedula_pasaporte, fecha_devolucion, imagen, observaciones } = data;
         
         if (estado === 'prestado' && cedula_pasaporte) {
+            // Validar que el nombre coincida con el registrado para esa cédula
+            const [existing] = await db.query('SELECT prestado_a FROM equipos WHERE cedula_pasaporte = ? AND prestado_a IS NOT NULL AND id != ? LIMIT 1', [cedula_pasaporte, id]);
+            if (existing.length > 0 && existing[0].prestado_a !== prestado_a) {
+                const error = new Error(`La cédula ${cedula_pasaporte} ya está registrada a nombre de ${existing[0].prestado_a}.`);
+                error.statusCode = 400;
+                throw error;
+            }
+
             const [countResult] = await db.query('SELECT COUNT(*) as count FROM equipos WHERE cedula_pasaporte = ? AND estado = ? AND id != ?', [cedula_pasaporte, 'prestado', id]);
             if (countResult[0].count >= 5) {
                 const error = new Error('El cliente ya tiene el límite máximo de 5 equipos prestados.');

@@ -184,15 +184,21 @@ function renderTable(equipos) {
 
     const groups = {};
     equipos.forEach(eq => {
-        const key = eq.estado === 'prestado' ? (eq.prestado_a || 'Sin Nombre') : (eq.estado === 'mantenimiento' ? 'En Reparación' : 'Disponibles');
+        const key = eq.estado === 'prestado' ? (eq.cedula_pasaporte || 'Sin Documento') : (eq.estado === 'mantenimiento' ? 'En Reparación' : 'Disponibles');
         if (!groups[key]) groups[key] = [];
         groups[key].push(eq);
     });
 
-    for (const [client, items] of Object.entries(groups)) {
+    for (const [key, items] of Object.entries(groups)) {
         const headerTr = document.createElement('tr');
         headerTr.className = 'group-header';
-        headerTr.innerHTML = `<td colspan="7" class="fw-bold py-2"><i class="bi bi-person-fill me-2"></i>${escapeHtml(client)} <span class="badge bg-secondary ms-2">${items.length}</span></td>`;
+        
+        let headerText = key;
+        if (items[0].estado === 'prestado') {
+            headerText = `${items[0].prestado_a} (${key})`;
+        }
+        
+        headerTr.innerHTML = `<td colspan="7" class="fw-bold py-2"><i class="bi bi-person-fill me-2"></i>${escapeHtml(headerText)} <span class="badge bg-secondary ms-2">${items.length}</span></td>`;
         tbody.appendChild(headerTr);
 
         items.forEach(eq => {
