@@ -195,7 +195,7 @@ function renderTable(equipos) {
         
         let headerText = key;
         if (items[0].estado === 'prestado') {
-            headerText = `${items[0].prestado_a} (${key})`;
+            headerText = items[0].prestado_a || 'Sin Nombre';
         }
         
         headerTr.innerHTML = `<td colspan="7" class="fw-bold py-2"><i class="bi bi-person-fill me-2"></i>${escapeHtml(headerText)} <span class="badge bg-secondary ms-2">${items.length}</span></td>`;
@@ -229,11 +229,11 @@ function renderTable(equipos) {
                         </div>` : ''}
                     </div>
                 </td>
-                <td><span class="text-info">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span></td>
-                <td><span class="text-white-50 small">${isPrestado ? escapeHtml(eq.cedula_pasaporte || '-') : '-'}</span></td>
-                <td><span class="font-mono small text-white">${fechaPrestamo}</span></td>
-                <td><span class="text-danger font-mono small">${fechaDevolucion}</span></td>
-                <td><span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span></td>
+                <td class="text-center"><span class="text-info">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span></td>
+                <td class="text-center"><span class="text-white-50 small">${isPrestado ? escapeHtml(eq.cedula_pasaporte || '-') : '-'}</span></td>
+                <td class="text-center"><span class="font-mono small text-white">${fechaPrestamo}</span></td>
+                <td class="text-center"><span class="text-danger font-mono small">${fechaDevolucion}</span></td>
+                <td class="text-center"><span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span></td>
                 <td class="text-end">
                     <div class="d-flex justify-content-end gap-2">
                         ${isPrestado ? `
