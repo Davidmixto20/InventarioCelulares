@@ -4,8 +4,8 @@ Equipo.createTable().catch(console.error);
 
 exports.getAll = async (req, res, next) => {
     try {
-        const { estado, nombre } = req.query;
-        const equipos = await Equipo.findAll({ estado, nombre });
+        const { estado, nombre, cedula_pasaporte } = req.query;
+        const equipos = await Equipo.findAll({ estado, nombre, cedula_pasaporte });
         res.status(200).json(equipos);
     } catch (error) {
         next(error);
