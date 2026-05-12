@@ -734,3 +734,118 @@ hr {
   border-radius: 6px;
   display: block;
 }
+
+/* --- LAYOUT SIDEBAR & DASHBOARD --- */
+
+#wrapper {
+    overflow-x: hidden;
+    background-color: var(--bg-base);
+}
+
+#sidebar-wrapper {
+    min-height: 100vh;
+    width: 250px;
+    background: #0d1321 !important;
+    border-right: 1px solid var(--border-glass) !important;
+    transition: margin 0.25s ease-out;
+    z-index: 1000;
+}
+
+#sidebar-wrapper .sidebar-heading {
+    padding: 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-glass);
+}
+
+#sidebar-wrapper .list-group-item {
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    border: none;
+    padding: 1rem 1.5rem;
+    font-size: 0.9rem;
+    transition: all var(--transition);
+}
+
+#sidebar-wrapper .list-group-item:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--cyan) !important;
+    padding-left: 1.8rem;
+}
+
+#sidebar-wrapper .list-group-item.active {
+    background: rgba(0, 224, 255, 0.1) !important;
+    color: var(--cyan) !important;
+    border-left: 3px solid var(--cyan);
+}
+
+#page-content-wrapper {
+    min-width: 0;
+    width: 100%;
+}
+
+/* Light Theme for Content Area */
+.bg-card-work {
+    background: #ffffff !important;
+    color: #1a202c !important;
+}
+
+.bg-card-work .card-header {
+    background: #f7fafc !important;
+    border-bottom: 1px solid #edf2f7 !important;
+}
+
+.bg-card-work .card-header .fs-5 {
+    color: #1a202c !important;
+}
+
+.table-light-custom {
+    --bs-table-bg: #ffffff;
+    --bs-table-striped-bg: #f7fafc;
+    --bs-table-hover-bg: #edf2f7;
+    --bs-table-border-color: #edf2f7;
+    --bs-table-color: #1a202c;
+    color: #1a202c !important;
+}
+
+.table-light-custom thead th {
+    background: #f7fafc !important;
+    color: #4a5568 !important;
+    border-bottom: 2px solid #edf2f7 !important;
+}
+
+.table-light-custom td {
+    color: #2d3748 !important;
+    border-color: #edf2f7 !important;
+}
+
+.table-light-custom tbody tr:hover td {
+    background: #f7fafc !important;
+}
+
+.table-light-custom .text-secondary {
+    color: #718096 !important;
+}
+
+.table-light-custom .text-muted {
+    color: #a0aec0 !important;
+}
+
+.table-light-custom .text-primary {
+    color: #2b6cb0 !important;
+}
+
+/* Group Header in Light Table */
+.table-light-custom tr.group-header td {
+    background: #edf2f7 !important;
+    color: #2b6cb0 !important;
+}
+
+/* Animations for sections */
+.content-section {
+    animation: fadeUp 0.5s ease both;
+}
+
+.d-none {
+    display: none !important;
+}

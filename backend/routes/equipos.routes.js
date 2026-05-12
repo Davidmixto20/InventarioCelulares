@@ -4,8 +4,9 @@ const equiposController = require('../controllers/equipos.controller');
 const { validateEquipo } = require('../middlewares/validate.middleware');
 
 router.get('/', equiposController.getAll);
-
+router.get('/stats/dashboard', equiposController.getDashboardStats);
 router.get('/:id', equiposController.getById);
+router.get('/:id/historial', equiposController.getHistorial);
 
 router.post('/', validateEquipo, equiposController.create);
 

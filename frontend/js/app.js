@@ -2,15 +2,142 @@ const API_URL = window.location.hostname === 'localhost' || window.location.host
     ? 'http://localhost:3000/api/equipos'
     : 'https://inventariocelulares.onrender.com/api/equipos';
 let equipoModal;
+let retornoModal;
+let currentSection = 'dashboard';
+let charts = {};
 
 document.addEventListener('DOMContentLoaded', () => {
     equipoModal = new bootstrap.Modal(document.getElementById('equipoModal'));
-    loadEquipos();
+    retornoModal = new bootstrap.Modal(document.getElementById('retornoModal'));
+    
+    switchSection('dashboard');
+    
     document.getElementById('searchInput').addEventListener('input', debounce(loadEquipos, 300));
     document.getElementById('filterEstado').addEventListener('change', loadEquipos);
     document.getElementById('equipoForm').addEventListener('submit', handleFormSubmit);
+    document.getElementById('retornoForm').addEventListener('submit', handleRetornoSubmit);
     document.getElementById('cedula_pasaporte').addEventListener('blur', handleCedulaBlur);
+    
+    document.getElementById('menu-toggle')?.addEventListener('click', () => {
+        document.getElementById('sidebar-wrapper').classList.toggle('d-none');
+    });
 });
+
+function switchSection(sectionId) {
+    currentSection = sectionId;
+    
+    document.querySelectorAll('.content-section').forEach(sec => {
+        sec.classList.add('d-none');
+    });
+    
+    document.getElementById(`section-${sectionId}`).classList.remove('d-none');
+    
+    document.querySelectorAll('#sidebar-wrapper .list-group-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    const links = document.querySelectorAll('#sidebar-wrapper .list-group-item');
+    links.forEach(link => {
+        if (link.getAttribute('onclick').includes(sectionId)) {
+            link.classList.add('active');
+        }
+    });
+    
+    if (sectionId === 'dashboard') {
+        loadDashboardStats();
+    } else if (sectionId === 'inventario') {
+        loadEquipos();
+    }
+}
+
+async function loadDashboardStats() {
+    try {
+        const response = await fetch(`${API_URL}/stats/dashboard`);
+        const data = await response.json();
+        
+        document.getElementById('dashStatTotal').innerText = data.stats.total || 0;
+        document.getElementById('dashStatDisponibles').innerText = data.stats.disponibles || 0;
+        document.getElementById('dashStatPrestados').innerText = data.stats.prestados || 0;
+        document.getElementById('dashStatMantenimiento').innerText = data.stats.mantenimiento || 0;
+        
+        renderCharts(data);
+    } catch (error) {
+        console.error('Error loading dashboard stats:', error);
+    }
+}
+
+function renderCharts(data) {
+    const ctx1 = document.getElementById('chartMostBorrowed').getContext('2d');
+    
+    if (charts.mostBorrowed) {
+        charts.mostBorrowed.destroy();
+    }
+    
+    charts.mostBorrowed = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: data.mostBorrowed.map(item => item.nombre),
+            datasets: [{
+                label: 'Veces Prestado',
+                data: data.mostBorrowed.map(item => item.count),
+                backgroundColor: 'rgba(0, 224, 255, 0.5)',
+                borderColor: 'rgba(0, 224, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#fff' }
+                },
+                x: {
+                    ticks: { color: '#fff' }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: '#fff' } }
+            }
+        }
+    });
+    
+    const ctx2 = document.getElementById('chartDistribution').getContext('2d');
+    
+    if (charts.distribution) {
+        charts.distribution.destroy();
+    }
+    
+    charts.distribution = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Disponibles', 'Prestados', 'Mantenimiento'],
+            datasets: [{
+                data: [data.stats.disponibles, data.stats.prestados, data.stats.mantenimiento],
+                backgroundColor: [
+                    'rgba(0, 255, 178, 0.6)',
+                    'rgba(255, 184, 48, 0.6)',
+                    'rgba(255, 77, 109, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(0, 255, 178, 1)',
+                    'rgba(255, 184, 48, 1)',
+                    'rgba(255, 77, 109, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#fff' }
+                }
+            }
+        }
+    });
+}
 
 function debounce(func, wait) {
     let timeout;
@@ -35,21 +162,12 @@ async function loadEquipos() {
         if (params.toString()) url += '?' + params.toString();
         const response = await fetch(url);
         const data = await response.json();
-        actualizarStats(data);
+        
+        document.getElementById('registrosCount').innerText = `${data.length} registros`;
         renderTable(data);
     } catch (error) {
         showError('No se pudieron cargar los equipos.');
     }
-}
-
-function actualizarStats(equipos) {
-    const total = equipos.length;
-    const disponibles = equipos.filter(e => e.estado === 'disponible').length;
-    const prestados = equipos.filter(e => e.estado === 'prestado').length;
-    document.getElementById('statTotal').innerText = total;
-    document.getElementById('statDisponibles').innerText = disponibles;
-    document.getElementById('statPrestados').innerText = prestados;
-    document.getElementById('registrosCount').innerText = `${total} registros`;
 }
 
 function renderTable(equipos) {
@@ -60,26 +178,27 @@ function renderTable(equipos) {
         return;
     }
 
-    // Grouping
     const groups = {};
     equipos.forEach(eq => {
-        const key = eq.estado === 'prestado' ? (eq.prestado_a || 'Sin Nombre') : 'Disponibles';
+        const key = eq.estado === 'prestado' ? (eq.prestado_a || 'Sin Nombre') : (eq.estado === 'mantenimiento' ? 'En Reparación' : 'Disponibles');
         if (!groups[key]) groups[key] = [];
         groups[key].push(eq);
     });
 
-    // Render groups
     for (const [client, items] of Object.entries(groups)) {
-        // Render header row for group
         const headerTr = document.createElement('tr');
-        headerTr.style.background = 'rgba(255, 255, 255, 0.1)';
-        headerTr.innerHTML = `<td colspan="7" class="fw-bold py-2 text-info"><i class="bi bi-person-fill me-2"></i>${escapeHtml(client)} <span class="badge bg-secondary ms-2">${items.length}</span></td>`;
+        headerTr.className = 'group-header';
+        headerTr.innerHTML = `<td colspan="7" class="fw-bold py-2"><i class="bi bi-person-fill me-2"></i>${escapeHtml(client)} <span class="badge bg-secondary ms-2">${items.length}</span></td>`;
         tbody.appendChild(headerTr);
 
         items.forEach(eq => {
             const tr = document.createElement('tr');
             const isPrestado = eq.estado === 'prestado';
-            const badgeClass = isPrestado ? 'bg-warning text-dark' : 'bg-success';
+            
+            let badgeClass = 'bg-success';
+            if (eq.estado === 'prestado') badgeClass = 'bg-warning text-dark';
+            if (eq.estado === 'mantenimiento') badgeClass = 'bg-danger';
+            
             const formatFecha = (fechaStr) => {
                 if (!fechaStr) return '-';
                 const d = new Date(fechaStr);
@@ -88,10 +207,11 @@ function renderTable(equipos) {
             const fechaPrestamo = isPrestado ? formatFecha(eq.fecha_prestamo) : '-';
             const fechaDevolucion = isPrestado ? formatFecha(eq.fecha_devolucion) : '-';
             const imgUrl = eq.imagen && eq.imagen.trim() !== '' ? eq.imagen : null;
+            
             tr.innerHTML = `
                 <td>
                     <div class="d-flex flex-column position-relative equipo-name-cell">
-                        <span class="fw-bold">${escapeHtml(eq.nombre)}</span>
+                        <span class="fw-bold text-dark">${escapeHtml(eq.nombre)}</span>
                         <span class="text-secondary font-mono x-small" style="font-size: 0.7rem;">${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
                         ${imgUrl ? `
                         <div class="hover-preview shadow-lg rounded-3 border border-glass">
@@ -101,11 +221,15 @@ function renderTable(equipos) {
                 </td>
                 <td><span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span></td>
                 <td><span class="text-secondary small">${isPrestado ? escapeHtml(eq.cedula_pasaporte || '-') : '-'}</span></td>
-                <td><span class="text-light font-mono small">${fechaPrestamo}</span></td>
+                <td><span class="font-mono small text-dark">${fechaPrestamo}</span></td>
                 <td><span class="text-danger font-mono small">${fechaDevolucion}</span></td>
                 <td><span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span></td>
                 <td class="text-end">
                     <div class="d-flex justify-content-end gap-2">
+                        ${isPrestado ? `
+                        <button class="btn btn-outline-success btn-sm" onclick="openRetornoModal(${eq.id})">
+                            <i class="bi bi-arrow-return-left"></i> Devolver
+                        </button>` : ''}
                         <button class="btn btn-outline-secondary btn-sm" onclick='editEquipo(${JSON.stringify(eq).replace(/'/g, "\\'")})'>
                             <i class="bi bi-pencil"></i>
                         </button>
@@ -250,6 +374,50 @@ async function deleteEquipo(id) {
             throw new Error(result.message || 'Error al eliminar');
         }
         loadEquipos();
+    } catch (error) {
+        alert(error.message);
+    }
+}
+
+function openRetornoModal(id) {
+    document.getElementById('retornoEquipoId').value = id;
+    document.getElementById('retornoForm').reset();
+    retornoModal.show();
+}
+
+async function handleRetornoSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('retornoEquipoId').value;
+    const diagnostico = document.getElementById('diagnostico').value;
+    const observaciones = document.getElementById('retornoObservaciones').value;
+    
+    let nuevoEstado = 'disponible';
+    if (diagnostico === 'Daño Estético' || diagnostico === 'Falla Técnica') {
+        nuevoEstado = 'mantenimiento';
+    }
+    
+    try {
+        const responseGet = await fetch(`${API_URL}/${id}`);
+        const currentData = await responseGet.json();
+        
+        const updatePayload = {
+            ...currentData,
+            estado: nuevoEstado,
+            observaciones: `Retorno (${diagnostico}): ${observaciones}`
+        };
+        
+        const response = await fetch(`${API_URL}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatePayload)
+        });
+        
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || 'Error al procesar devolución');
+        
+        retornoModal.hide();
+        loadEquipos();
+        if (currentSection === 'dashboard') loadDashboardStats();
     } catch (error) {
         alert(error.message);
     }

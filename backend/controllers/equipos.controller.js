@@ -55,3 +55,22 @@ exports.delete = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getDashboardStats = async (req, res, next) => {
+    try {
+        const stats = await Equipo.getDashboardStats();
+        res.status(200).json(stats);
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getHistorial = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const historial = await Equipo.getHistorial(id);
+        res.status(200).json(historial);
+    } catch (error) {
+        next(error);
+    }
+};
