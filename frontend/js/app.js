@@ -82,6 +82,7 @@ function renderTable(equipos) {
                 </div>
             </td>
             <td><span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span></td>
+            <td><span class="text-secondary small">${isPrestado ? escapeHtml(eq.cedula_pasaporte || '-') : '-'}</span></td>
             <td><span class="text-light font-mono small">${fechaPrestamo}</span></td>
             <td><span class="text-danger font-mono small">${fechaDevolucion}</span></td>
             <td><span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span></td>
@@ -115,6 +116,7 @@ function editEquipo(equipo) {
     document.getElementById('modelo').value = equipo.modelo || '';
     document.getElementById('estado').value = equipo.estado;
     document.getElementById('prestado_a').value = equipo.prestado_a || '';
+    document.getElementById('cedula_pasaporte').value = equipo.cedula_pasaporte || '';
     document.getElementById('inputImagen').value = equipo.imagen || '';
     if (equipo.fecha_devolucion) {
         document.getElementById('fecha_devolucion').value = equipo.fecha_devolucion.split('T')[0];
@@ -131,16 +133,20 @@ function togglePrestadoA() {
     const estado = document.getElementById('estado').value;
     const prestadoAContainer = document.getElementById('prestadoAContainer');
     const prestadoAInput = document.getElementById('prestado_a');
+    const cedulaPasaporteInput = document.getElementById('cedula_pasaporte');
     const fechaDevolucionInput = document.getElementById('fecha_devolucion');
     if (estado === 'prestado') {
         prestadoAContainer.style.display = 'block';
         prestadoAInput.required = true;
+        cedulaPasaporteInput.required = true;
         fechaDevolucionInput.required = true;
     } else {
         prestadoAContainer.style.display = 'none';
         prestadoAInput.required = false;
+        cedulaPasaporteInput.required = false;
         fechaDevolucionInput.required = false;
         prestadoAInput.value = '';
+        cedulaPasaporteInput.value = '';
         fechaDevolucionInput.value = '';
     }
 }
@@ -154,6 +160,7 @@ async function handleFormSubmit(e) {
         modelo: document.getElementById('modelo').value,
         estado: document.getElementById('estado').value,
         prestado_a: document.getElementById('prestado_a').value,
+        cedula_pasaporte: document.getElementById('cedula_pasaporte').value,
         fecha_devolucion: document.getElementById('fecha_devolucion').value,
         imagen: document.getElementById('inputImagen').value
     };

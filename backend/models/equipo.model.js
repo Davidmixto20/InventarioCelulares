@@ -10,6 +10,7 @@ const Equipo = {
                 modelo VARCHAR(100),
                 estado ENUM('disponible', 'prestado') DEFAULT 'disponible',
                 prestado_a VARCHAR(255) NULL,
+                cedula_pasaporte VARCHAR(50) NULL,
                 fecha_prestamo DATETIME NULL,
                 fecha_devolucion DATE NULL,
                 imagen TEXT NULL,
@@ -20,6 +21,14 @@ const Equipo = {
         try {
             await db.query('ALTER TABLE equipos MODIFY id INT AUTO_INCREMENT;');
         } catch (e) { }
+
+        try {
+            await db.query("ALTER TABLE equipos ADD COLUMN cedula_pasaporte VARCHAR(50) NULL");
+        } catch (error) {
+            if (error.code !== 'ER_DUP_FIELDNAME' && error.errno !== 1060) {
+                throw error;
+            }
+        }
     },
 
     findAll: async (filters = {}) => {
@@ -48,7 +57,7 @@ const Equipo = {
     },
 
     create: async (data) => {
-        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion, imagen } = data;
+        const { nombre, marca, modelo, estado, prestado_a, cedula_pasaporte, fecha_devolucion, imagen } = data;
         let fecha_prestamo = null;
         let fechaDev = null;
         if (estado === 'prestado') {
@@ -57,15 +66,15 @@ const Equipo = {
         }
 
         const query = `
-            INSERT INTO equipos (nombre, marca, modelo, estado, prestado_a, fecha_prestamo, fecha_devolucion, imagen) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO equipos (nombre, marca, modelo, estado, prestado_a, cedula_pasaporte, fecha_prestamo, fecha_devolucion, imagen) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
-        const [result] = await db.query(query, [nombre, marca, modelo, estado || 'disponible', prestado_a || null, fecha_prestamo, fechaDev, imagen || null]);
+        const [result] = await db.query(query, [nombre, marca, modelo, estado || 'disponible', prestado_a || null, cedula_pasaporte || null, fecha_prestamo, fechaDev, imagen || null]);
         return result.insertId;
     },
 
     update: async (id, data) => {
-        const { nombre, marca, modelo, estado, prestado_a, fecha_devolucion, imagen } = data;
+        const { nombre, marca, modelo, estado, prestado_a, cedula_pasaporte, fecha_devolucion, imagen } = data;
         let fecha_prestamo = null;
         let fechaDev = null;
         if (estado === 'prestado' && prestado_a) {
@@ -75,7 +84,7 @@ const Equipo = {
 
         const query = `
             UPDATE equipos 
-            SET nombre = ?, marca = ?, modelo = ?, estado = ?, prestado_a = ?, 
+            SET nombre = ?, marca = ?, modelo = ?, estado = ?, prestado_a = ?, cedula_pasaporte = ?,
                 fecha_prestamo = IF(? = 'prestado', COALESCE(fecha_prestamo, ?), NULL),
                 fecha_devolucion = IF(? = 'prestado', ?, NULL),
                 imagen = ?
@@ -87,6 +96,7 @@ const Equipo = {
             modelo, 
             estado, 
             estado === 'prestado' ? prestado_a : null, 
+            estado === 'prestado' ? cedula_pasaporte : null,
             estado,
             fecha_prestamo,
             estado,

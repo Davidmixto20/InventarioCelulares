@@ -320,7 +320,7 @@ h5 { font-size: 1.05rem; font-weight: 600; }
 
 .table-responsive {
   border-radius: var(--radius-md);
-  overflow: hidden;
+  overflow-x: auto !important;
 }
 
 .table {
