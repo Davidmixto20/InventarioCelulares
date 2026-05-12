@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('searchInput').addEventListener('input', debounce(loadEquipos, 300));
     document.getElementById('filterEstado').addEventListener('change', loadEquipos);
     document.getElementById('equipoForm').addEventListener('submit', handleFormSubmit);
+    document.getElementById('cedula_pasaporte').addEventListener('blur', handleCedulaBlur);
 });
 
 function debounce(func, wait) {
@@ -55,50 +56,68 @@ function renderTable(equipos) {
     const tbody = document.getElementById('equiposTableBody');
     tbody.innerHTML = '';
     if (equipos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No se encontraron equipos</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No se encontraron equipos</td></tr>';
         return;
     }
+
+    // Grouping
+    const groups = {};
     equipos.forEach(eq => {
-        const tr = document.createElement('tr');
-        const isPrestado = eq.estado === 'prestado';
-        const badgeClass = isPrestado ? 'bg-warning text-dark' : 'bg-success';
-        const formatFecha = (fechaStr) => {
-            if (!fechaStr) return '-';
-            const d = new Date(fechaStr);
-            return isNaN(d.getTime()) ? '-' : d.toLocaleDateString();
-        };
-        const fechaPrestamo = isPrestado ? formatFecha(eq.fecha_prestamo) : '-';
-        const fechaDevolucion = isPrestado ? formatFecha(eq.fecha_devolucion) : '-';
-        const imgUrl = eq.imagen && eq.imagen.trim() !== '' ? eq.imagen : null;
-        tr.innerHTML = `
-            <td>
-                <div class="d-flex flex-column position-relative equipo-name-cell">
-                    <span class="fw-bold">${escapeHtml(eq.nombre)}</span>
-                    <span class="text-secondary font-mono x-small" style="font-size: 0.7rem;">${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
-                    ${imgUrl ? `
-                    <div class="hover-preview shadow-lg rounded-3 border border-glass">
-                        <img src="${imgUrl}" alt="Preview" style="width: 120px; height: 120px; object-fit: cover;">
-                    </div>` : ''}
-                </div>
-            </td>
-            <td><span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span></td>
-            <td><span class="text-secondary small">${isPrestado ? escapeHtml(eq.cedula_pasaporte || '-') : '-'}</span></td>
-            <td><span class="text-light font-mono small">${fechaPrestamo}</span></td>
-            <td><span class="text-danger font-mono small">${fechaDevolucion}</span></td>
-            <td><span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span></td>
-            <td class="text-end">
-                <div class="d-flex justify-content-end gap-2">
-                    <button class="btn btn-outline-secondary btn-sm" onclick='editEquipo(${JSON.stringify(eq).replace(/'/g, "\\'")})'>
-                        <i class="bi bi-pencil"></i>
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm text-danger" onclick="deleteEquipo(${eq.id})">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            </td>
-        `;
-        tbody.appendChild(tr);
+        const key = eq.estado === 'prestado' ? (eq.prestado_a || 'Sin Nombre') : 'Disponibles';
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(eq);
     });
+
+    // Render groups
+    for (const [client, items] of Object.entries(groups)) {
+        // Render header row for group
+        const headerTr = document.createElement('tr');
+        headerTr.style.background = 'rgba(255, 255, 255, 0.1)';
+        headerTr.innerHTML = `<td colspan="7" class="fw-bold py-2 text-info"><i class="bi bi-person-fill me-2"></i>${escapeHtml(client)} <span class="badge bg-secondary ms-2">${items.length}</span></td>`;
+        tbody.appendChild(headerTr);
+
+        items.forEach(eq => {
+            const tr = document.createElement('tr');
+            const isPrestado = eq.estado === 'prestado';
+            const badgeClass = isPrestado ? 'bg-warning text-dark' : 'bg-success';
+            const formatFecha = (fechaStr) => {
+                if (!fechaStr) return '-';
+                const d = new Date(fechaStr);
+                return isNaN(d.getTime()) ? '-' : d.toLocaleDateString();
+            };
+            const fechaPrestamo = isPrestado ? formatFecha(eq.fecha_prestamo) : '-';
+            const fechaDevolucion = isPrestado ? formatFecha(eq.fecha_devolucion) : '-';
+            const imgUrl = eq.imagen && eq.imagen.trim() !== '' ? eq.imagen : null;
+            tr.innerHTML = `
+                <td>
+                    <div class="d-flex flex-column position-relative equipo-name-cell">
+                        <span class="fw-bold">${escapeHtml(eq.nombre)}</span>
+                        <span class="text-secondary font-mono x-small" style="font-size: 0.7rem;">${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
+                        ${imgUrl ? `
+                        <div class="hover-preview shadow-lg rounded-3 border border-glass">
+                            <img src="${imgUrl}" alt="Preview" style="width: 120px; height: 120px; object-fit: cover;">
+                        </div>` : ''}
+                    </div>
+                </td>
+                <td><span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span></td>
+                <td><span class="text-secondary small">${isPrestado ? escapeHtml(eq.cedula_pasaporte || '-') : '-'}</span></td>
+                <td><span class="text-light font-mono small">${fechaPrestamo}</span></td>
+                <td><span class="text-danger font-mono small">${fechaDevolucion}</span></td>
+                <td><span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span></td>
+                <td class="text-end">
+                    <div class="d-flex justify-content-end gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick='editEquipo(${JSON.stringify(eq).replace(/'/g, "\\'")})'>
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm text-danger" onclick="deleteEquipo(${eq.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
 }
 
 function prepareAdd() {
@@ -116,8 +135,10 @@ function editEquipo(equipo) {
     document.getElementById('modelo').value = equipo.modelo || '';
     document.getElementById('estado').value = equipo.estado;
     document.getElementById('prestado_a').value = equipo.prestado_a || '';
+    document.getElementById('tipo_documento').value = equipo.tipo_documento || 'cedula';
     document.getElementById('cedula_pasaporte').value = equipo.cedula_pasaporte || '';
     document.getElementById('inputImagen').value = equipo.imagen || '';
+    updateDocumentLimit();
     if (equipo.fecha_devolucion) {
         document.getElementById('fecha_devolucion').value = equipo.fecha_devolucion.split('T')[0];
     } else {
@@ -134,6 +155,7 @@ function togglePrestadoA() {
     const prestadoAContainer = document.getElementById('prestadoAContainer');
     const prestadoAInput = document.getElementById('prestado_a');
     const cedulaPasaporteInput = document.getElementById('cedula_pasaporte');
+    const tipoDocumentoSelect = document.getElementById('tipo_documento');
     const fechaDevolucionInput = document.getElementById('fecha_devolucion');
     if (estado === 'prestado') {
         prestadoAContainer.style.display = 'block';
@@ -146,8 +168,37 @@ function togglePrestadoA() {
         cedulaPasaporteInput.required = false;
         fechaDevolucionInput.required = false;
         prestadoAInput.value = '';
+        tipoDocumentoSelect.value = 'cedula';
         cedulaPasaporteInput.value = '';
         fechaDevolucionInput.value = '';
+        updateDocumentLimit();
+    }
+}
+
+function updateDocumentLimit() {
+    const tipo = document.getElementById('tipo_documento').value;
+    const input = document.getElementById('cedula_pasaporte');
+    if (tipo === 'cedula') {
+        input.maxLength = 11;
+    } else {
+        input.removeAttribute('maxLength');
+    }
+}
+
+async function handleCedulaBlur() {
+    const cedula = document.getElementById('cedula_pasaporte').value;
+    if (!cedula) return;
+    try {
+        const response = await fetch(`${API_URL}?cedula_pasaporte=${cedula}`);
+        const data = await response.json();
+        if (data.length > 0) {
+            const record = data.find(r => r.prestado_a);
+            if (record) {
+                document.getElementById('prestado_a').value = record.prestado_a;
+            }
+        }
+    } catch (error) {
+        console.error('Error al buscar cédula:', error);
     }
 }
 
@@ -160,6 +211,7 @@ async function handleFormSubmit(e) {
         modelo: document.getElementById('modelo').value,
         estado: document.getElementById('estado').value,
         prestado_a: document.getElementById('prestado_a').value,
+        tipo_documento: document.getElementById('tipo_documento').value,
         cedula_pasaporte: document.getElementById('cedula_pasaporte').value,
         fecha_devolucion: document.getElementById('fecha_devolucion').value,
         imagen: document.getElementById('inputImagen').value

@@ -140,9 +140,18 @@
                                 <label for="prestado_a" class="form-label">Prestado a *</label>
                                 <input type="text" class="form-control" id="prestado_a">
                             </div>
-                            <div class="mb-3">
-                                <label for="cedula_pasaporte" class="form-label">Cédula o Pasaporte *</label>
-                                <input type="text" class="form-control" id="cedula_pasaporte">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tipo_documento" class="form-label">Tipo de Documento</label>
+                                    <select class="form-select" id="tipo_documento" onchange="updateDocumentLimit()">
+                                        <option value="cedula">Cédula</option>
+                                        <option value="pasaporte">Pasaporte</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="cedula_pasaporte" class="form-label">Documento *</label>
+                                    <input type="text" class="form-control" id="cedula_pasaporte" maxlength="11">
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="fecha_devolucion" class="form-label">Fecha límite de devolución *</label>
