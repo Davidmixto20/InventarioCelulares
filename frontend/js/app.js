@@ -357,7 +357,7 @@ async function handleFormSubmit(e) {
             body: JSON.stringify(payload)
         });
         const result = await response.json();
-        if (!response.ok) throw new Error(result.message || 'Error al guardar el equipo');
+        if (!response.ok) throw new Error(result.error || result.message || 'Error al guardar el equipo');
         document.getElementById('equipoId').value = '';
         document.getElementById('equipoForm').reset();
         equipoModal.hide();
