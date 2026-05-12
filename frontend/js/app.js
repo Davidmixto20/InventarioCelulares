@@ -19,7 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('cedula_pasaporte').addEventListener('blur', handleCedulaBlur);
     
     document.getElementById('menu-toggle')?.addEventListener('click', () => {
-        document.getElementById('sidebar-wrapper').classList.toggle('d-none');
+        if (window.innerWidth <= 768) {
+            document.getElementById('sidebar-wrapper').classList.toggle('active');
+        } else {
+            document.getElementById('sidebar-wrapper').classList.toggle('collapsed');
+        }
     });
 });
 
@@ -27,10 +31,10 @@ function switchSection(sectionId) {
     currentSection = sectionId;
     
     document.querySelectorAll('.content-section').forEach(sec => {
-        sec.classList.add('d-none');
+        sec.classList.remove('active');
     });
     
-    document.getElementById(`section-${sectionId}`).classList.remove('d-none');
+    document.getElementById(`section-${sectionId}`).classList.add('active');
     
     document.querySelectorAll('#sidebar-wrapper .list-group-item').forEach(item => {
         item.classList.remove('active');
