@@ -799,6 +799,35 @@ hr {
     color: #1a202c !important;
 }
 
+/* Overrides for inputs inside light area */
+.bg-card-work .form-control,
+.bg-card-work .form-select {
+    color: #1a202c !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e0 !important;
+}
+
+.bg-card-work .form-control::placeholder {
+    color: #718096 !important;
+}
+
+.bg-card-work .input-group-text {
+    background: #edf2f7 !important;
+    border: 1px solid #cbd5e0 !important;
+    color: #4a5568 !important;
+}
+
+/* Overrides for buttons inside light area */
+.bg-card-work .btn-outline-secondary {
+    color: #4a5568 !important;
+    border: 1px solid #cbd5e0 !important;
+}
+
+.bg-card-work .btn-outline-secondary:hover {
+    background: #edf2f7 !important;
+    color: #1a202c !important;
+}
+
 .table-light-custom {
     --bs-table-bg: #ffffff;
     --bs-table-striped-bg: #f7fafc;
@@ -809,9 +838,9 @@ hr {
 }
 
 .table-light-custom thead th {
-    background: #f7fafc !important;
+    background: #edf2f7 !important;
     color: #4a5568 !important;
-    border-bottom: 2px solid #edf2f7 !important;
+    border-bottom: 2px solid #cbd5e0 !important;
 }
 
 .table-light-custom td {
@@ -824,15 +853,19 @@ hr {
 }
 
 .table-light-custom .text-secondary {
-    color: #718096 !important;
+    color: #4a5568 !important;
 }
 
 .table-light-custom .text-muted {
-    color: #a0aec0 !important;
+    color: #718096 !important;
 }
 
 .table-light-custom .text-primary {
     color: #2b6cb0 !important;
+}
+
+.table-light-custom .text-dark {
+    color: #1a202c !important;
 }
 
 /* Group Header in Light Table */
