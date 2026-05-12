@@ -94,7 +94,9 @@ const Equipo = {
         if (estado === 'prestado' && cedula_pasaporte) {
             const [countResult] = await db.query('SELECT COUNT(*) as count FROM equipos WHERE cedula_pasaporte = ? AND estado = "prestado"', [cedula_pasaporte]);
             if (countResult[0].count >= 5) {
-                throw new Error('El cliente ya tiene el límite máximo de 5 equipos prestados.');
+                const error = new Error('El cliente ya tiene el límite máximo de 5 equipos prestados.');
+                error.statusCode = 400;
+                throw error;
             }
         }
 
@@ -125,7 +127,9 @@ const Equipo = {
         if (estado === 'prestado' && cedula_pasaporte) {
             const [countResult] = await db.query('SELECT COUNT(*) as count FROM equipos WHERE cedula_pasaporte = ? AND estado = "prestado" AND id != ?', [cedula_pasaporte, id]);
             if (countResult[0].count >= 5) {
-                throw new Error('El cliente ya tiene el límite máximo de 5 equipos prestados.');
+                const error = new Error('El cliente ya tiene el límite máximo de 5 equipos prestados.');
+                error.statusCode = 400;
+                throw error;
             }
         }
 
