@@ -8,7 +8,7 @@ const Equipo = {
                 nombre VARCHAR(255) NOT NULL,
                 marca VARCHAR(100),
                 modelo VARCHAR(100),
-                estado ENUM('disponible', 'prestado', 'mantenimiento') DEFAULT 'disponible',
+                estado VARCHAR(50) DEFAULT 'disponible',
                 prestado_a VARCHAR(255) NULL,
                 tipo_documento ENUM('cedula', 'pasaporte') DEFAULT 'cedula',
                 cedula_pasaporte VARCHAR(50) NULL,
@@ -40,7 +40,7 @@ const Equipo = {
         }
 
         try {
-            await db.query("ALTER TABLE equipos MODIFY COLUMN estado ENUM('disponible', 'prestado', 'mantenimiento') DEFAULT 'disponible'");
+            await db.query("ALTER TABLE equipos MODIFY COLUMN estado VARCHAR(50) DEFAULT 'disponible'");
         } catch (error) { }
 
         const queryHistorial = `

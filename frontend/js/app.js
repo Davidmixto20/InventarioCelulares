@@ -215,17 +215,17 @@ function renderTable(equipos) {
             tr.innerHTML = `
                 <td>
                     <div class="d-flex flex-column position-relative equipo-name-cell">
-                        <span class="fw-bold text-dark">${escapeHtml(eq.nombre)}</span>
-                        <span class="text-secondary font-mono x-small" style="font-size: 0.7rem;">${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
+                        <span class="fw-bold text-white">${escapeHtml(eq.nombre)}</span>
+                        <span class="text-white-50 font-mono x-small" style="font-size: 0.7rem;">${escapeHtml(eq.marca || '-')} / ${escapeHtml(eq.modelo || '-')}</span>
                         ${imgUrl ? `
                         <div class="hover-preview shadow-lg rounded-3 border border-glass">
                             <img src="${imgUrl}" alt="Preview" style="width: 120px; height: 120px; object-fit: cover;">
                         </div>` : ''}
                     </div>
                 </td>
-                <td><span class="text-primary">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span></td>
-                <td><span class="text-secondary small">${isPrestado ? escapeHtml(eq.cedula_pasaporte || '-') : '-'}</span></td>
-                <td><span class="font-mono small text-dark">${fechaPrestamo}</span></td>
+                <td><span class="text-info">${isPrestado ? escapeHtml(eq.prestado_a) : '-'}</span></td>
+                <td><span class="text-white-50 small">${isPrestado ? escapeHtml(eq.cedula_pasaporte || '-') : '-'}</span></td>
+                <td><span class="font-mono small text-white">${fechaPrestamo}</span></td>
                 <td><span class="text-danger font-mono small">${fechaDevolucion}</span></td>
                 <td><span class="badge ${badgeClass} rounded-pill px-3">${eq.estado}</span></td>
                 <td class="text-end">
