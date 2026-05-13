@@ -211,11 +211,11 @@ const Equipo = {
         `);
         
         const [mostBorrowed] = await db.query(`
-            SELECT e.nombre, COUNT(h.id) as count 
+            SELECT COALESCE(NULLIF(e.marca, ''), 'Sin Marca') as nombre, COUNT(h.id) as count 
             FROM historial_equipos h
             JOIN equipos e ON h.equipo_id = e.id
             WHERE h.accion = 'prestamo'
-            GROUP BY e.id
+            GROUP BY COALESCE(NULLIF(e.marca, ''), 'Sin Marca')
             ORDER BY count DESC
             LIMIT 5
         `);
