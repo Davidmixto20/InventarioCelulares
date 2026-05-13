@@ -5,6 +5,8 @@ let equipoModal;
 let retornoModal;
 let currentSection = 'dashboard';
 let charts = {};
+let dashboardData = null;
+let currentChartType = 'brands';
 
 document.addEventListener('DOMContentLoaded', () => {
     equipoModal = new bootstrap.Modal(document.getElementById('equipoModal'));
@@ -64,6 +66,7 @@ async function loadDashboardStats() {
         document.getElementById('dashStatPrestados').innerText = data.stats.prestados || 0;
         document.getElementById('dashStatMantenimiento').innerText = data.stats.mantenimiento || 0;
         
+        dashboardData = data;
         renderCharts(data);
     } catch (error) {
         console.error('Error loading dashboard stats:', error);
@@ -71,41 +74,11 @@ async function loadDashboardStats() {
 }
 
 function renderCharts(data) {
-    const ctx1 = document.getElementById('chartMostBorrowed').getContext('2d');
-    
-    if (charts.mostBorrowed) {
-        charts.mostBorrowed.destroy();
-    }
-    
-    charts.mostBorrowed = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-            labels: data.mostBorrowed.map(item => item.nombre),
-            datasets: [{
-                label: 'Veces Prestado',
-                data: data.mostBorrowed.map(item => item.count),
-                backgroundColor: 'rgba(0, 224, 255, 0.5)',
-                borderColor: 'rgba(0, 224, 255, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#fff' }
-                },
-                x: {
-                    ticks: { color: '#fff' }
-                }
-            },
-            plugins: {
-                legend: { labels: { color: '#fff' } }
-            }
-        }
-    });
-    
+    renderDistributionChart(data);
+    renderMostBorrowedChart(currentChartType);
+}
+
+function renderDistributionChart(data) {
     const ctx2 = document.getElementById('chartDistribution').getContext('2d');
     
     if (charts.distribution) {
@@ -141,6 +114,63 @@ function renderCharts(data) {
             }
         }
     });
+}
+
+function renderMostBorrowedChart(type) {
+    const ctx1 = document.getElementById('chartMostBorrowed').getContext('2d');
+    
+    if (charts.mostBorrowed) {
+        charts.mostBorrowed.destroy();
+    }
+    
+    const chartData = type === 'brands' ? dashboardData.mostBorrowedBrands : dashboardData.mostBorrowedModels;
+    const title = type === 'brands' ? 'Marcas Más Prestadas' : 'Modelos Más Prestados';
+    
+    const titleEl = document.getElementById('chartTitle');
+    if (titleEl) titleEl.innerText = title;
+    
+    charts.mostBorrowed = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: chartData.map(item => item.nombre),
+            datasets: [{
+                label: 'Veces Prestado',
+                data: chartData.map(item => item.count),
+                backgroundColor: 'rgba(0, 224, 255, 0.5)',
+                borderColor: 'rgba(0, 224, 255, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#fff' }
+                },
+                x: {
+                    ticks: { color: '#fff' }
+                }
+            },
+            plugins: {
+                legend: { labels: { color: '#fff' } }
+            }
+        }
+    });
+}
+
+function switchChart(type) {
+    currentChartType = type;
+    
+    const btnBrands = document.getElementById('btnShowBrands');
+    const btnModels = document.getElementById('btnShowModels');
+    
+    if (btnBrands) btnBrands.classList.toggle('active', type === 'brands');
+    if (btnModels) btnModels.classList.toggle('active', type === 'models');
+    
+    if (dashboardData) {
+        renderMostBorrowedChart(type);
+    }
 }
 
 function debounce(func, wait) {

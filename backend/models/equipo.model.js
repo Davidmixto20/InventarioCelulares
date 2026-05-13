@@ -210,7 +210,7 @@ const Equipo = {
             FROM equipos
         `);
         
-        const [mostBorrowed] = await db.query(`
+        const [mostBorrowedBrands] = await db.query(`
             SELECT COALESCE(NULLIF(e.marca, ''), 'Sin Marca') as nombre, COUNT(h.id) as count 
             FROM historial_equipos h
             JOIN equipos e ON h.equipo_id = e.id
@@ -219,8 +219,18 @@ const Equipo = {
             ORDER BY count DESC
             LIMIT 5
         `);
+
+        const [mostBorrowedModels] = await db.query(`
+            SELECT COALESCE(NULLIF(e.modelo, ''), 'Sin Modelo') as nombre, COUNT(h.id) as count 
+            FROM historial_equipos h
+            JOIN equipos e ON h.equipo_id = e.id
+            WHERE h.accion = 'prestamo'
+            GROUP BY COALESCE(NULLIF(e.modelo, ''), 'Sin Modelo')
+            ORDER BY count DESC
+            LIMIT 5
+        `);
         
-        return { stats: stats[0], mostBorrowed };
+        return { stats: stats[0], mostBorrowedBrands, mostBorrowedModels };
     },
 
     getHistorial: async (equipoId) => {
